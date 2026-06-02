@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Kết bạn</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f1013;
+    --surface: #16181d;
+    --border: #22252e;
+    --accent: #d4f53c;
+    --text: #e8eaf0;
+    --muted: #6b7280;
+    --hover: #1e2128;
+    --green: #4ade80;
+    --red: #f87171;
+  }
+
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    min-height: 100vh;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    padding: 28px 16px; gap: 4px;
+    height: 100vh; position: sticky; top: 0;
+  }
+  .logo {
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 18px;
+    padding: 0 12px 20px; border-bottom: 1px solid var(--border); margin-bottom: 8px;
+    display: flex; align-items: center; gap: 8px;
+    text-decoration: none; color: var(--text);
+  }
+  .logo-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; }
+  .nav-label { font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; padding: 12px 12px 4px; }
+  .nav-link {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px; border-radius: 8px;
+    color: var(--muted); text-decoration: none;
+    font-size: 13px; font-weight: 500;
+    transition: background 0.15s, color 0.15s;
+  }
+  .nav-link:hover { background: var(--hover); color: var(--text); }
+  .nav-link.active { background: rgba(212,245,60,0.08); color: var(--accent); border-left: 2px solid var(--accent); padding-left: 10px; }
+  .nav-link .icon { font-size: 14px; width: 20px; text-align: center; }
+  .spacer { flex: 1; }
+  .online-badge { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--muted); border-top: 1px solid var(--border); padding-top: 16px; margin-top: 4px; }
+  .online-badge .dot { width: 6px; height: 6px; background: var(--green); border-radius: 50%; }
+
+  /* ── MAIN ── */
+  .main { display: flex; flex-direction: column; }
+  .topbar { padding: 32px 40px 24px; border-bottom: 1px solid var(--border); }
+  .page-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 28px; letter-spacing: -0.5px; margin-bottom: 6px; }
+  .page-sub { font-size: 13px; color: var(--muted); }
+
+  .content { padding: 32px 40px; display: flex; flex-direction: column; gap: 36px; }
+
+  .section-head { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .section-head h2 { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+  .section-head .line { flex: 1; height: 1px; background: var(--border); }
+  .badge { background: rgba(212,245,60,0.12); color: var(--accent); font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 100px; }
+
+  /* Search form */
+  .search-form { display: flex; gap: 10px; max-width: 440px; }
+  .search-form input {
+    flex: 1; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 14px; color: var(--text);
+    font-family: 'Inter', sans-serif; font-size: 14px; outline: none;
+    transition: border-color 0.15s;
+  }
+  .search-form input:focus { border-color: rgba(212,245,60,0.4); }
+  .search-form input::placeholder { color: var(--muted); }
+  .btn-primary {
+    padding: 10px 20px; background: var(--accent); color: #0f1013;
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px;
+    border: none; border-radius: 8px; cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s; white-space: nowrap;
+  }
+  .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+
+  /* Request list */
+  .request-list { display: flex; flex-direction: column; gap: 8px; }
+  .request-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px 18px;
+    display: flex; align-items: center; gap: 14px;
+    transition: border-color 0.15s;
+  }
+  .request-card:hover { border-color: #2e333e; }
+  .avatar {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: linear-gradient(135deg, rgba(212,245,60,0.2), rgba(56,217,245,0.15));
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 16px;
+    color: var(--accent); flex-shrink: 0;
+  }
+  .request-info { flex: 1; }
+  .request-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px; margin-bottom: 2px; }
+  .request-mssv { font-size: 12px; color: var(--muted); }
+  .request-actions { display: flex; gap: 8px; }
+  .student-results { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; max-width: 640px; }
+
+  .btn-accept, .btn-reject {
+    padding: 7px 16px; border-radius: 7px;
+    font-family: 'Inter', sans-serif; font-weight: 600; font-size: 12px;
+    border: none; cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+    text-decoration: none; display: inline-flex; align-items: center; gap: 5px;
+  }
+  .btn-accept { background: rgba(74,222,128,0.12); color: var(--green); border: 1px solid rgba(74,222,128,0.25); }
+  .btn-accept:hover { background: rgba(74,222,128,0.2); transform: translateY(-1px); }
+  .btn-reject { background: rgba(248,113,113,0.1); color: var(--red); border: 1px solid rgba(248,113,113,0.2); }
+  .btn-reject:hover { background: rgba(248,113,113,0.18); transform: translateY(-1px); }
+
+  /* Empty */
+  .empty { padding: 40px 0; text-align: center; color: var(--muted); font-size: 13px; }
+  .empty span { font-size: 28px; display: block; margin-bottom: 8px; opacity: 0.35; }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <a href="/home" class="logo"><div class="logo-dot"></div>NTU CHAT</a>
+    <div class="nav-label">Điều hướng</div>
+    <a href="/home" class="nav-link"><span class="icon">⊞</span> Tổng quan</a>
+    <a href="/friends" class="nav-link active"><span class="icon">＋</span> Kết bạn</a>
+    <div class="spacer"></div>
+    <div class="online-badge"><div class="dot"></div> Đang hoạt động</div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="topbar">
+      <div class="page-title">Kết bạn</div>
+      <div class="page-sub">Tìm kiếm và quản lý bạn bè của bạn.</div>
+    </div>
+
+    <div class="content">
+
+
+      <!-- GỬI LỜI MỜI — khớp với @PostMapping("/friends/add") -->
+      <div>
+        <div class="section-head">
+          <h2>Gửi lời mời nhanh</h2>
+          <div class="line"></div>
+        </div>
+        <form th:action="@{/friends/add}" method="post" class="search-form">
+          <input type="text" name="mssv"
+                 placeholder="Nhập MSSV người muốn kết bạn…"
+                 autocomplete="off" />
+          <button type="submit" class="btn-primary">Gửi ＋</button>
+        </form>
+      </div>
+
+      <!-- LỜI MỜI ĐẾN — dùng "requests" khớp với Controller -->
+      <div>
+        <div class="section-head">
+          <h2>Lời mời đến</h2>
+          <div class="line"></div>
+          <span class="badge" th:text="${#lists.size(requests)}">0</span>
+        </div>
+
+        <div class="request-list">
+          <th:block th:if="${#lists.isEmpty(requests)}">
+            <div class="empty">
+              <span>◎</span>
+              Không có lời mời nào.
+            </div>
+          </th:block>
+
+          <th:block th:each="r : ${requests}">
+            <div class="request-card">
+              <div class="avatar"
+                   th:text="${#strings.substring(r.nguoiGui.hoTen, 0, 1)}">A</div>
+              <div class="request-info">
+                <div class="request-name" th:text="${r.nguoiGui.hoTen}">Họ tên</div>
+                <div class="request-mssv" th:text="${r.nguoiGui.mssv}">MSSV</div>
+              </div>
+              <div class="request-actions">
+                <!-- Dùng GET khớp với @GetMapping("/friends/accept/{id}") -->
+                <a th:href="@{/friends/accept/{id}(id=${r.id})}" class="btn-accept">✓ Chấp nhận</a>
+                <a th:href="@{/friends/reject/{id}(id=${r.id})}" class="btn-reject">✕ Từ chối</a>
+              </div>
+            </div>
+          </th:block>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+</div>
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+
+<script th:inline="javascript">
+const mssv = /*[[${session.user.mssv}]]*/ '';
+const presenceClientId = 'friends-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+
+function sendHeartbeat() {
+    fetch('/api/presence/heartbeat?clientId=' + encodeURIComponent(presenceClientId), { method: 'POST' }).catch(() => {});
+}
+
+function sendOffline() {
+    const url = '/api/presence/offline?clientId=' + encodeURIComponent(presenceClientId);
+    if (navigator.sendBeacon) {
+        navigator.sendBeacon(url);
+    } else {
+        fetch(url, { method: 'POST', keepalive: true }).catch(() => {});
+    }
+}
+
+// ── Thêm card lời mời vào DOM ngay lập tức, không reload ──
+function addRequestCard(data) {
+    // Ẩn thông báo "Không có lời mời" nếu đang hiện
+    const empty = document.querySelector('.empty');
+    if (empty) empty.remove();
+
+    // Cập nhật badge số lượng
+    const badge = document.querySelector('.badge');
+    if (badge) badge.textContent = parseInt(badge.textContent || '0') + 1;
+
+    // Tạo toast notification nhỏ góc phải
+    showToast(data.hoTen + ' đã gửi lời mời kết bạn 👋');
+
+    // Chỉ inject card nếu người dùng đang ở trang này
+    const list = document.querySelector('.request-list');
+    if (!list) return;
+
+    const initial = data.hoTen.trim().charAt(0).toUpperCase();
+    const card = document.createElement('div');
+    card.className = 'request-card';
+    card.id = 'req-' + data.id;
+    card.innerHTML = `
+        <div class="avatar">${initial}</div>
+        <div class="request-info">
+            <div class="request-name">${escHtml(data.hoTen)}</div>
+            <div class="request-mssv">${escHtml(data.mssv)}</div>
+        </div>
+        <div class="request-actions">
+            <a href="/friends/accept/${data.id}" class="btn-accept">✓ Chấp nhận</a>
+            <a href="/friends/reject/${data.id}" class="btn-reject">✕ Từ chối</a>
+        </div>`;
+    list.prepend(card);
+
+    // Highlight nhẹ để user chú ý card mới
+    card.style.borderColor = 'rgba(212,245,60,0.4)';
+    setTimeout(() => card.style.borderColor = '', 2000);
+}
+
+// ── Toast nhẹ, không dùng alert() ──
+function showToast(msg) {
+    let toast = document.getElementById('__toast__');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = '__toast__';
+        toast.style.cssText = `
+            position:fixed; bottom:24px; right:24px; z-index:9999;
+            background:#1e2128; border:1px solid rgba(212,245,60,0.35);
+            color:#e8eaf0; font-family:'Inter',sans-serif; font-size:13px;
+            padding:12px 18px; border-radius:10px;
+            box-shadow:0 4px 24px rgba(0,0,0,0.4);
+            transition:opacity 0.4s; opacity:0; max-width:300px;`;
+        document.body.appendChild(toast);
+    }
+    toast.textContent = '🔔 ' + msg;
+    toast.style.opacity = '1';
+    clearTimeout(toast._timer);
+    toast._timer = setTimeout(() => toast.style.opacity = '0', 4000);
+}
+
+function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── Kết nối STOMP với auto-reconnect ──
+let stompClient = null;
+
+function connect() {
+    const socket = new SockJS('/chat');
+    stompClient = Stomp.over(socket);
+    stompClient.debug = null; // tắt log spam
+
+    stompClient.connect({}, function () {
+        console.log('[WS] Connected, subscribing to /topic/friend/' + mssv);
+        stompClient.send('/app/presence', {}, JSON.stringify({mssv: mssv, online: true, clientId: presenceClientId}));
+
+        stompClient.subscribe('/topic/friend/' + mssv, function (frame) {
+            try {
+                const data = JSON.parse(frame.body);
+                addRequestCard(data);
+            } catch (e) {
+                console.warn('[WS] Không parse được payload:', frame.body);
+            }
+        });
+
+        stompClient.subscribe('/topic/notify/' + mssv, function (frame) {
+            const data = JSON.parse(frame.body);
+            if (data.type === 'MESSAGE') {
+                showToast(data.senderName + ': ' + data.preview);
+            }
+        });
+
+    }, function (error) {
+        // Mất kết nối → thử lại sau 5 giây
+        console.warn('[WS] Mất kết nối, thử lại sau 5s...', error);
+        setTimeout(connect, 5000);
+    });
+}
+
+sendHeartbeat();
+setInterval(sendHeartbeat, 10000);
+window.addEventListener('pagehide', sendOffline);
+connect();
+</script>
+</body>
+</html>

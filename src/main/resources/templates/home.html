@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Home</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0f1013; --surface: #16181d; --border: #22252e;
+    --accent: #d4f53c; --text: #e8eaf0; --muted: #6b7280; --hover: #1e2128;
+  }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; display: grid; grid-template-columns: 240px 1fr; }
+
+  /* SIDEBAR */
+  .sidebar { background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; height: 100vh; position: sticky; top: 0; padding: 28px 16px; gap: 4px; overflow-y: auto; }
+  .logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 18px; letter-spacing: -0.5px; padding: 0 12px 20px; border-bottom: 1px solid var(--border); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--text); }
+  .logo-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; }
+  .user-block { padding: 12px; border-radius: 10px; background: var(--hover); margin-bottom: 8px; }
+  .user-block .label { font-size: 10px; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 3px; }
+  .user-block .mssv { font-size: 12px; color: var(--accent); font-weight: 500; margin-bottom: 1px; }
+  .user-block .name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px; }
+  .nav-label { font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; padding: 12px 12px 4px; }
+  .nav-link { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; color: var(--muted); text-decoration: none; font-size: 13px; font-weight: 500; transition: background 0.15s, color 0.15s; }
+  .nav-link:hover { background: var(--hover); color: var(--text); }
+  .nav-link .icon { font-size: 15px; width: 20px; text-align: center; flex-shrink: 0; }
+  .nav-text { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .unread-badge { min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: #f87171; color: #0f1013; font-size: 11px; font-weight: 800; display: none; align-items: center; justify-content: center; flex-shrink: 0; }
+  .unread-badge.show { display: inline-flex; }
+  .presence-state { font-size: 10px; font-weight: 700; text-transform: uppercase; flex-shrink: 0; }
+  .presence-state.online { color: #4ade80; }
+  .presence-state.offline { color: #6b7280; }
+  .nav-link.has-unread { background: rgba(248,113,113,0.1); color: var(--text); }
+  .spacer { flex: 1; }
+  .online-badge { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--muted); border-top: 1px solid var(--border); margin-top: 4px; padding-top: 16px; }
+  .online-badge .dot { width: 6px; height: 6px; background: #4ade80; border-radius: 50%; }
+
+  /* MAIN */
+  .main { display: flex; flex-direction: column; }
+  .topbar { padding: 32px 40px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-end; justify-content: space-between; }
+  .page-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 28px; letter-spacing: -0.5px; line-height: 1; margin-bottom: 6px; }
+  .page-sub { font-size: 13px; color: var(--muted); }
+  .friends-btn { display: flex; align-items: center; gap: 8px; padding: 10px 20px; background: var(--accent); color: #0f1013; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; border-radius: 8px; text-decoration: none; transition: opacity 0.15s, transform 0.15s; }
+  .friends-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+
+  .content { padding: 32px 40px; flex: 1; display: flex; flex-direction: column; gap: 36px; }
+  .section-head { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .section-head h2 { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px; letter-spacing: 0.5px; color: var(--muted); text-transform: uppercase; white-space: nowrap; }
+  .section-head .line { flex: 1; height: 1px; background: var(--border); }
+
+  /* ROOM GRID */
+  .room-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+  .room-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-decoration: none; display: flex; flex-direction: column; gap: 12px; transition: border-color 0.15s, background 0.15s, transform 0.15s; }
+  .room-card:hover { border-color: rgba(212,245,60,0.35); background: var(--hover); transform: translateY(-2px); }
+  .room-top { display: flex; align-items: center; justify-content: space-between; }
+  .room-hash { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 20px; color: var(--border); transition: color 0.15s; }
+  .room-at   { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 20px; color: var(--border); transition: color 0.15s; }
+  .room-card:hover .room-hash { color: var(--accent); }
+  .room-card:hover .room-at   { color: #38d9f5; }
+  .room-active { width: 7px; height: 7px; background: #4ade80; border-radius: 50%; }
+  .presence-dot { display: inline-block; width: 8px; height: 8px; background: #6b7280; border-radius: 50%; flex-shrink: 0; }
+  .presence-dot.online { background: #4ade80; box-shadow: 0 0 0 3px rgba(74,222,128,0.12); }
+  .presence-dot.offline { background: #6b7280; }
+  .room-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .room-id { font-size: 11px; color: var(--muted); }
+  .private-search { width: 100%; max-width: 360px; margin-bottom: 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--text); outline: none; font-family: 'Inter', sans-serif; }
+  .private-search:focus { border-color: rgba(56,217,245,0.45); }
+  .private-search::placeholder { color: var(--muted); }
+  .empty { grid-column: 1/-1; padding: 40px 0; text-align: center; color: var(--muted); font-size: 13px; }
+  .empty span { font-size: 28px; display: block; margin-bottom: 8px; opacity: 0.4; }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <a href="/home" class="logo"><div class="logo-dot"></div>NTU CHAT</a>
+
+  <div class="user-block">
+    <div class="label">Sinh viên</div>
+    <div class="mssv" th:text="${sv.mssv}">22521234</div>
+    <div class="name" th:text="${sv.hoTen}">Nguyễn Văn A</div>
+  </div>
+
+  <div class="nav-label">Điều hướng</div>
+  <a href="/home"    class="nav-link"><span class="icon">⊞</span> Tổng quan</a>
+  <a href="/friends" class="nav-link"><span class="icon">＋</span> Kết bạn</a>
+
+  <div class="nav-label">Phòng nhóm</div>
+  <th:block th:each="room : ${rooms}">
+    <a th:href="@{/room/{id}(id=${room.id})}" class="nav-link"
+       th:data-room="${room.id}">
+      <span class="icon">#</span>
+      <span class="nav-text" th:text="${room.tenRoom}"></span>
+      <span class="unread-badge" th:attr="data-badge-room=${room.id}">0</span>
+    </a>
+  </th:block>
+
+ <div class="nav-label">Chat riêng</div>
+
+<th:block th:if="${not #lists.isEmpty(privateRooms)}">
+
+  <th:block th:each="room : ${privateRooms}">
+
+    <a th:href="@{/room/{id}(id=${room.id})}" class="nav-link"
+       th:data-room="${room.id}"
+       th:data-user="${room.user1.mssv == sv.mssv ? room.user2.mssv : room.user1.mssv}">
+
+      <span class="icon">@</span>
+      <span class="presence-dot"
+            th:classappend="${room.user1.mssv == sv.mssv ? room.user2.online : room.user1.online} ? ' online' : ' offline'"></span>
+
+      <span
+        class="nav-text"
+        th:text="${room.user1.mssv == sv.mssv ? room.user2.hoTen : room.user1.hoTen}">
+      </span>
+      <span class="presence-state"
+            th:classappend="${room.user1.mssv == sv.mssv ? room.user2.online : room.user1.online} ? ' online' : ' offline'"
+            th:text="${room.user1.mssv == sv.mssv ? (room.user2.online ? 'Online' : 'Offline') : (room.user1.online ? 'Online' : 'Offline')}">Offline</span>
+      <span class="unread-badge" th:attr="data-badge-room=${room.id}">0</span>
+
+    </a>
+
+  </th:block>
+
+</th:block>
+
+  <div class="spacer"></div>
+  <div class="online-badge"><div class="dot"></div>Đang hoạt động</div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div>
+      <div class="page-title">Xin chào, <span th:text="${sv.hoTen}">Bạn</span> 👋</div>
+      <div class="page-sub">Chọn phòng để bắt đầu trò chuyện.</div>
+    </div>
+    <a href="/friends" class="friends-btn">＋ Kết bạn</a>
+  </div>
+
+  <div class="content">
+
+    <!-- PHÒNG NHÓM -->
+    <div>
+      <div class="section-head">
+        <h2>Phòng nhóm</h2>
+        <div class="line"></div>
+      </div>
+      <div class="room-grid">
+        <th:block th:if="${#lists.isEmpty(rooms)}">
+          <div class="empty"><span>⊘</span>Chưa có phòng nhóm nào.</div>
+        </th:block>
+        <th:block th:each="room : ${rooms}">
+          <a th:href="@{/room/{id}(id=${room.id})}" class="room-card"
+             th:data-room="${room.id}">
+            <div class="room-top">
+              <div class="room-hash">#</div>
+              <span class="unread-badge" th:attr="data-badge-room=${room.id}">0</span>
+              <div class="presence-dot online"></div>
+            </div>
+            <div>
+              <div class="room-name" th:text="${room.tenRoom}">Tên phòng</div>
+              <div class="room-id">ID: <span th:text="${room.id}">001</span></div>
+            </div>
+          </a>
+        </th:block>
+      </div>
+    </div>
+
+    <!-- CHAT RIÊNG -->
+   <div>
+  <div class="section-head">
+    <h2>Chat riêng</h2>
+    <div class="line"></div>
+  </div>
+
+  <input type="text" id="privateSearch" class="private-search"
+         placeholder="Tim kiem ban be da ket ban..."
+         autocomplete="off" oninput="filterPrivateRooms()" />
+
+  <div class="room-grid">
+
+    <th:block th:if="${#lists.isEmpty(privateRooms)}">
+      <div class="empty">
+        <span>@</span>
+        Chưa có cuộc trò chuyện riêng nào.
+      </div>
+    </th:block>
+
+    <th:block th:each="room : ${privateRooms}">
+
+      <a th:href="@{/room/{id}(id=${room.id})}" class="room-card"
+         data-private-room="true"
+         th:data-room="${room.id}"
+         th:data-user="${room.user1.mssv == sv.mssv ? room.user2.mssv : room.user1.mssv}">
+
+        <div class="room-top">
+          <div class="room-at">@</div>
+          <span class="unread-badge" th:attr="data-badge-room=${room.id}">0</span>
+          <div class="presence-dot"
+               th:classappend="${room.user1.mssv == sv.mssv ? room.user2.online : room.user1.online} ? ' online' : ' offline'"></div>
+        </div>
+
+        <div>
+
+          <!-- Tên người còn lại -->
+          <div class="room-name"
+               th:text="${room.user1.mssv == sv.mssv ? room.user2.hoTen : room.user1.hoTen}">
+          </div>
+
+         
+
+        </div>
+
+      </a>
+
+    </th:block>
+
+  </div>
+</div>
+
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+<script th:inline="javascript">
+  const myMssv = /*[[${sv.mssv}]]*/ "";
+  const myName = /*[[${sv.hoTen}]]*/ "";
+  const sidebarRoomIds = (/*[[${sidebarRoomIds}]]*/ []) || [];
+  const unreadPrefix = 'chatUnread:';
+  const recentlyCounted = new Set();
+  const presenceClientId = 'home-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+
+  function showToast(msg, url) {
+    let toast = document.getElementById('__toast__');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = '__toast__';
+      toast.style.cssText = 'position:fixed;right:24px;bottom:24px;z-index:9999;background:#1e2128;border:1px solid rgba(212,245,60,.35);color:#e8eaf0;padding:12px 16px;border-radius:10px;font-size:13px;max-width:320px;cursor:pointer;box-shadow:0 8px 30px rgba(0,0,0,.35);opacity:0;transition:opacity .2s';
+      document.body.appendChild(toast);
+    }
+    toast.textContent = msg;
+    toast.onclick = () => { if (url) location.href = url; };
+    toast.style.opacity = '1';
+    clearTimeout(toast._timer);
+    toast._timer = setTimeout(() => toast.style.opacity = '0', 4500);
+  }
+
+  function updatePresence(mssv, online) {
+    document.querySelectorAll('[data-user="' + mssv + '"] .presence-dot').forEach(dot => {
+      dot.classList.toggle('online', online);
+      dot.classList.toggle('offline', !online);
+    });
+    document.querySelectorAll('[data-user="' + mssv + '"] .presence-state').forEach(state => {
+      state.textContent = online ? 'Online' : 'Offline';
+      state.classList.toggle('online', online);
+      state.classList.toggle('offline', !online);
+    });
+  }
+
+  function filterPrivateRooms() {
+    const keyword = (document.getElementById('privateSearch')?.value || '').trim().toLowerCase();
+    document.querySelectorAll('[data-private-room="true"]').forEach(card => {
+      const name = (card.querySelector('.room-name')?.textContent || '').toLowerCase();
+      card.style.display = name.includes(keyword) ? '' : 'none';
+    });
+  }
+
+  function setUnread(roomId, count) {
+    const cappedCount = Math.min(count, 5);
+    document.querySelectorAll('[data-badge-room="' + roomId + '"]').forEach(badge => {
+      badge.textContent = '+' + cappedCount;
+      badge.classList.toggle('show', count > 0);
+    });
+    document.querySelectorAll('[data-room="' + roomId + '"]').forEach(link => {
+      link.classList.toggle('has-unread', count > 0);
+    });
+  }
+
+  function markRoomUnread(roomId, eventKey) {
+    if (eventKey && recentlyCounted.has(eventKey)) return;
+    if (eventKey) {
+      recentlyCounted.add(eventKey);
+      setTimeout(() => recentlyCounted.delete(eventKey), 3000);
+    }
+    const key = unreadPrefix + roomId;
+    const count = Math.min(parseInt(localStorage.getItem(key) || '0', 10) + 1, 5);
+    localStorage.setItem(key, String(count));
+    setUnread(roomId, count);
+  }
+
+  function loadUnreadBadges() {
+    document.querySelectorAll('[data-badge-room]').forEach(badge => {
+      const roomId = badge.dataset.badgeRoom;
+      setUnread(roomId, parseInt(localStorage.getItem(unreadPrefix + roomId) || '0', 10));
+    });
+  }
+
+  function subscribeVisibleRooms(stompClient) {
+    const roomIds = new Set((sidebarRoomIds || []).map(id => String(id)));
+
+    roomIds.forEach(roomId => {
+      stompClient.subscribe('/topic/room/' + roomId, frame => {
+        const data = JSON.parse(frame.body);
+        const sender = data.nguoiGuiMssv || data.nguoiGui;
+        const isMine = sender === myMssv || sender === myName;
+        if (!isMine) {
+          pollUnreadCounts();
+          showToast((data.nguoiGui || 'Tin nhan moi') + ': ' + (data.noiDung || data.fileName || 'File moi'), '/room/' + roomId);
+        }
+      });
+    });
+  }
+
+  function getSidebarRoomIds() {
+    const ids = new Set((sidebarRoomIds || []).map(id => String(id)));
+    document.querySelectorAll('[data-badge-room]').forEach(badge => ids.add(String(badge.dataset.badgeRoom)));
+    return Array.from(ids).filter(Boolean);
+  }
+
+  function getSidebarUserIds() {
+    const ids = new Set();
+    document.querySelectorAll('[data-user]').forEach(item => ids.add(String(item.dataset.user)));
+    return Array.from(ids).filter(Boolean);
+  }
+
+  function pollUnreadCounts() {
+    const ids = getSidebarRoomIds();
+    if (ids.length === 0) return;
+    fetch('/api/sidebar/unread?roomIds=' + encodeURIComponent(ids.join(',')))
+      .then(res => res.ok ? res.json() : {})
+      .then(data => {
+        ids.forEach(roomId => {
+          const serverCount = Number(data[roomId] || 0);
+          const count = serverCount;
+          localStorage.setItem(unreadPrefix + roomId, String(Math.min(count, 5)));
+          setUnread(roomId, count);
+        });
+      })
+      .catch(() => {});
+  }
+
+  function sendHeartbeat() {
+    fetch('/api/presence/heartbeat?clientId=' + encodeURIComponent(presenceClientId), { method: 'POST' }).catch(() => {});
+  }
+
+  function sendOffline() {
+    const url = '/api/presence/offline?clientId=' + encodeURIComponent(presenceClientId);
+    if (navigator.sendBeacon) {
+      navigator.sendBeacon(url);
+    } else {
+      fetch(url, { method: 'POST', keepalive: true }).catch(() => {});
+    }
+  }
+
+  function pollPresence() {
+    const ids = getSidebarUserIds();
+    if (ids.length === 0) return;
+    fetch('/api/sidebar/presence?mssvs=' + encodeURIComponent(ids.join(',')))
+      .then(res => res.ok ? res.json() : {})
+      .then(data => {
+        ids.forEach(mssv => updatePresence(mssv, Boolean(data[mssv])));
+      })
+      .catch(() => {});
+  }
+
+  function connectRealtime() {
+    const socket = new SockJS('/chat');
+    const stompClient = Stomp.over(socket);
+    stompClient.debug = null;
+    stompClient.connect({}, function() {
+      stompClient.send('/app/presence', {}, JSON.stringify({mssv: myMssv, online: true, clientId: presenceClientId}));
+      stompClient.subscribe('/topic/presence', frame => {
+        const data = JSON.parse(frame.body);
+        updatePresence(data.mssv, data.online);
+      });
+      subscribeVisibleRooms(stompClient);
+      stompClient.subscribe('/topic/notify/' + myMssv, frame => {
+        const data = JSON.parse(frame.body);
+        if (data.type === 'MESSAGE') {
+          pollUnreadCounts();
+          showToast(data.senderName + ': ' + data.preview, '/room/' + data.roomId);
+        }
+        if (data.type === 'FRIEND_REQUEST') showToast(data.senderName + ' da gui loi moi ket ban', '/friends');
+      });
+    }, () => setTimeout(connectRealtime, 5000));
+  }
+  loadUnreadBadges();
+  sendHeartbeat();
+  pollUnreadCounts();
+  pollPresence();
+  setInterval(pollUnreadCounts, 2500);
+  setInterval(pollPresence, 4000);
+  setInterval(sendHeartbeat, 10000);
+  window.addEventListener('pagehide', sendOffline);
+  connectRealtime();
+</script>
+</body>
+</html>
