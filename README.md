@@ -705,3 +705,7 @@ Dự án hiện phù hợp cho môi trường học tập/demo. Nếu triển kh
 Project: **DuAnTroChuyen / NTU CHAT**
 
 Mục tiêu: xây dựng hệ thống trò chuyện realtime phục vụ sinh viên, có khả năng mở rộng thành nền tảng giao tiếp nội bộ trong môi trường học tập.
+
+## 🎥 Demo Gửi file
+
+https://github.com/user-attachments/assets/86aef645-13e5-44ca-b770-a7ec2625f0e4
