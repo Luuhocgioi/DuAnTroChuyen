@@ -18,7 +18,11 @@
 Dự án phù hợp cho đồ án môn học, bài thực hành Spring Boot hoặc nền tảng mở rộng thành hệ thống giao tiếp nội bộ trong môi trường trường đại học.
 
 ---
+## 🎥 Video Demo
 
+> 📺 [Bấm vào đây để xem Video Demo website](https://youtu.be/ICWaRXDvR7M)
+
+---
 ## Mục Lục
 
 - [Tính năng nổi bật](#tính-năng-nổi-bật)
