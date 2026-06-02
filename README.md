@@ -420,7 +420,7 @@ java -version
 ### 2. Clone hoặc mở project
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/Luuhocgioi/DuAnTroChuyen.git
 cd DuAnTroChuyen
 ```
 
@@ -473,40 +473,60 @@ http://localhost:8080/login
 
 ---
 
-## Dữ Liệu Mẫu
+## Dữ Liệu Database
 
-Ứng dụng hiện chưa có màn hình đăng ký tài khoản, vì vậy cần thêm dữ liệu mẫu vào MySQL trước khi đăng nhập.
+Ứng dụng hiện chưa có màn hình đăng ký tài khoản, vì vậy cần import dữ liệu MySQL trước khi đăng nhập.
 
-Sau khi chạy project lần đầu để Hibernate tạo bảng, có thể thêm dữ liệu mẫu:
+Bạn có thể dùng file dump `chat (2).sql` xuất từ phpMyAdmin/MariaDB. File này đã bao gồm:
+
+- Database logic cho các bảng `khoa`, `lop`, `sinh_vien`, `chat_room`, `message`, `friend_request`.
+- Danh sách khoa: `CNTT`, `QTKD`, `KT`, `NN`, `DL`.
+- Danh sách lớp như `CNTT1`, `CNTT2`, `QTKD1`, `QTKD2`, `KT1`, `KT2`, `NN1`, `NN2`, `DL1`, `DL2`.
+- Nhiều tài khoản sinh viên có sẵn.
+- Một số phòng chat nhóm, phòng lớp, phòng riêng và lịch sử tin nhắn mẫu.
+
+### Cách import SQL
+
+Tạo database rỗng:
 
 ```sql
-INSERT INTO khoa (ma_khoa, ten_khoa)
-VALUES
-  ('CNTT', 'Công nghệ thông tin'),
-  ('KT', 'Kinh tế');
-
-INSERT INTO lop (ma_lop, ten_lop, ma_khoa)
-VALUES
-  ('CNTT1', 'CNTT K65-1', 'CNTT'),
-  ('CNTT2', 'CNTT K65-2', 'CNTT'),
-  ('KT1', 'Kinh tế K65-1', 'KT');
-
-INSERT INTO sinh_vien (mssv, ho_ten, password, online, last_seen, ma_khoa, ma_lop)
-VALUES
-  ('65130001', 'Nguyễn Văn A', '123456', false, NULL, 'CNTT', 'CNTT1'),
-  ('65130002', 'Trần Thị B', '123456', false, NULL, 'CNTT', 'CNTT1'),
-  ('65130003', 'Lê Văn C', '123456', false, NULL, 'CNTT', 'CNTT2'),
-  ('65130004', 'Phạm Thị D', '123456', false, NULL, 'KT', 'KT1');
+CREATE DATABASE chat CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-Tài khoản đăng nhập thử:
+Sau đó import file SQL bằng phpMyAdmin hoặc MySQL/MariaDB CLI:
+
+```bash
+mysql -u root -p chat < "chat (2).sql"
+```
+
+Nếu dùng XAMPP/phpMyAdmin:
+
+1. Mở phpMyAdmin.
+2. Tạo database tên `chat`.
+3. Chọn database `chat`.
+4. Vào tab **Import**.
+5. Chọn file `chat (2).sql`.
+6. Bấm **Import**.
+
+### Tài khoản đăng nhập thử
+
+Theo file SQL bạn cung cấp, các tài khoản mẫu đang dùng mật khẩu chung là `123`.
 
 | MSSV | Mật khẩu | Ghi chú |
 |---|---|---|
-| `65130001` | `123456` | Sinh viên lớp CNTT1 |
-| `65130002` | `123456` | Cùng lớp với `65130001` |
-| `65130003` | `123456` | Cùng khoa, khác lớp |
-| `65130004` | `123456` | Khác khoa |
+| `65131861` | `123` | Tài khoản chính trong dữ liệu mẫu |
+| `65130003` | `123` | Sinh viên khoa CNTT, lớp CNTT2 |
+| `65130004` | `123` | Sinh viên khoa QTKD, lớp QTKD1 |
+| `65130005` | `123` | Sinh viên khoa KT, lớp KT1 |
+| `65130073` | `123` | Sinh viên khoa DL, lớp DL2 |
+
+### Ghi chú về dump SQL
+
+- File dump có một số dữ liệu lịch sử được tạo trong quá trình test, ví dụ tin nhắn rỗng, phòng cũ hoặc file upload cũ.
+- Logic hiện tại của ứng dụng sử dụng các loại phòng chính: `KHOA`, `LOP`, `PRIVATE`.
+- Trong dump có thể còn bản ghi legacy như `GROUP`; các bản ghi này không ảnh hưởng tới luồng chính hiện tại nếu ứng dụng không truy vấn tới chúng.
+- Một số bản ghi `chat_room` cũ có `ma_khoa` hoặc `ma_lop` rỗng/null. Khi người dùng đăng nhập, ứng dụng vẫn có cơ chế tự tìm hoặc tạo phòng Khoa/Lớp đúng theo thông tin `sinh_vien.ma_khoa` và `sinh_vien.ma_lop`.
+- Nếu muốn dữ liệu sạch hơn, có thể giữ lại bảng `khoa`, `lop`, `sinh_vien` và để ứng dụng tự tạo lại các phòng chat khi truy cập `/home`.
 
 ---
 
@@ -531,6 +551,8 @@ Tài khoản đăng nhập thử:
 - `application/vnd.openxmlformats-officedocument.wordprocessingml.document`
 - `application/zip`
 - `application/x-zip-compressed`
+
+Lưu ý: file SQL dump có thể chứa một vài bản ghi upload cũ như `.mp3` hoặc `.exe` do dữ liệu được tạo trong quá trình thử nghiệm trước đó. Phiên bản code hiện tại chỉ cho upload các định dạng trong danh sách phía trên.
 
 ---
 
