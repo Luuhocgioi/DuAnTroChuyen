@@ -561,13 +561,17 @@ Lưu ý: file SQL dump có thể chứa một vài bản ghi upload cũ như `.m
 Ứng dụng gồm 4 màn hình Thymeleaf chính:
 
 ### Trang đăng nhập - `login.html`
-
+<div align="center">
+    <img src="pictures/login.png" width="800">
+</div>
 - Giao diện tối màu.
 - Form nhập MSSV và mật khẩu.
 - Hiển thị lỗi khi đăng nhập sai.
 
 ### Trang chủ - `home.html`
-
+<div align="center">
+    <img src="pictures/room.png" width="800">
+</div>
 - Sidebar thông tin sinh viên.
 - Danh sách phòng Khoa, phòng Lớp.
 - Danh sách chat riêng.
@@ -575,14 +579,18 @@ Lưu ý: file SQL dump có thể chứa một vài bản ghi upload cũ như `.m
 - Trạng thái online/offline của bạn bè.
 
 ### Trang kết bạn - `friends.html`
-
+<div align="center">
+    <img src="pictures/friend.png" width="800">
+</div>
 - Gửi lời mời kết bạn bằng MSSV.
 - Danh sách lời mời đang chờ.
 - Chấp nhận hoặc từ chối lời mời.
 - Nhận lời mời realtime bằng WebSocket.
 
 ### Trang phòng chat - `room.html`
-
+<div align="center">
+    <img src="pictures/chat.png" width="800">
+</div>
 - Danh sách tin nhắn.
 - Gửi text realtime.
 - Upload ảnh/file.
@@ -672,7 +680,7 @@ Dự án hiện phù hợp cho môi trường học tập/demo. Nếu triển kh
 
 ## Hướng Phát Triển
 
-- Thêm màn hình đăng ký và quản lý tài khoản sinh viên.
+- Quản lý tài khoản sinh viên.
 - Mã hóa mật khẩu bằng BCrypt.
 - Bổ sung phân quyền Spring Security theo session/login.
 - Thêm tìm kiếm sinh viên theo họ tên/MSSV trong giao diện kết bạn.
@@ -688,7 +696,7 @@ Dự án hiện phù hợp cho môi trường học tập/demo. Nếu triển kh
 
 ---
 
-## Tác Giả
+## Tác Giả : Nguyễn Hoàng Lưu
 
 Project: **DuAnTroChuyen / NTU CHAT**
 
